@@ -19,8 +19,10 @@ if not SDK_KEY:
     raise RuntimeError("Set LAUNCHDARKLY_SDK_KEY (e.g., in .env or the environment).")
 
 # Initialize client once (will be shared with --preload, then postfork() in workers)
+print(f"🚀 [PID {os.getpid()}] Initializing LaunchDarkly client in master process...")
 ldclient.set_config(LDConfig(SDK_KEY))
 client = ldclient.get()
+print(f"✅ [PID {os.getpid()}] LaunchDarkly client initialized, is_initialized={client.is_initialized()}")
 
 app = Flask(__name__)
 

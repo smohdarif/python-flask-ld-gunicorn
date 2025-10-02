@@ -24,29 +24,37 @@ LD_FLAG_KEY=sample-flag
 
 ## Running the Application
 
-### With Gunicorn (Production - with post_fork)
+### ⚠️ Important: macOS Limitation
+
+LaunchDarkly's `postfork()` **does not work on macOS** due to LibreSSL incompatibility.
+
+Choose your approach:
+
+### Option 1: Docker (✅ Recommended - Uses Best Practice)
 ```bash
-source venv/bin/activate
-gunicorn --config gunicorn.conf.py --preload app:app
+docker-compose up
 ```
+- ✅ Uses LaunchDarkly's `postfork()` best practice
+- ✅ Linux + OpenSSL environment
+- ✅ Matches production
+- See [DOCKER_WITH_POSTFORK.md](DOCKER_WITH_POSTFORK.md)
 
-**Why use `--preload` with `post_fork()`?**
-
-1. **Memory Efficiency**: The LaunchDarkly client is initialized once in the master process before forking workers
-2. **Proper Threading**: `post_fork()` reinitializes threads/connections in each worker process after forking
-3. **Best Practice**: This is the recommended way to use LaunchDarkly with Gunicorn
-
-### Without preload (simpler, but less efficient)
+### Option 2: Native macOS (✅ Stable, ❌ Less Efficient)
 ```bash
 source venv/bin/activate
 gunicorn --config gunicorn.conf.py app:app
 ```
+- ✅ Works on macOS
+- ✅ No crashes
+- ❌ No `postfork()` (higher memory usage)
+- ❌ Each worker initializes own LD client
 
-### With Flask development server (Development only)
+### Option 3: Flask Development Server
 ```bash
 source venv/bin/activate
 FLASK_APP=app.py flask run --port 8000
 ```
+- For development only
 
 ## Endpoints
 
